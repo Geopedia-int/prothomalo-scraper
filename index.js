@@ -14,7 +14,6 @@ admin.initializeApp({
 const db = admin.database();
 const parser = new xml2js.Parser();
 
-// যাচাইকৃত এবং সঠিক RSS Feed লিংকের তালিকা
 const RSS_FEEDS = {
     prothomalo: 'https://www.prothomalo.com/feed',
     jagonews24: 'https://www.jagonews24.com/rss/rss.xml',
@@ -31,7 +30,6 @@ const RSS_FEEDS = {
     risingbd: 'https://www.risingbd.com/rss/rss.xml'
 };
 
-// সাইটের ব্লকিং (403) বাইপাস করার হেডার
 const AXIOS_CONFIG = {
     headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -39,7 +37,7 @@ const AXIOS_CONFIG = {
         'Accept-Language': 'en-US,en;q=0.5',
         'Cache-Control': 'no-cache'
     },
-    timeout: 15000 // ১৫ সেকেন্ডে বাড়িয়ে দেওয়া হলো
+    timeout: 15000
 };
 
 async function fetchFullArticle(url, siteName) {
@@ -72,7 +70,6 @@ async function runScraper() {
                 const response = await axios.get(url, AXIOS_CONFIG);
                 const result = await parser.parseStringPromise(response.data);
                 
-                // RSS স্ট্রাকচার ভিন্ন হলেও ডাটা খুঁজে বের করার ব্যাকআপ লজিক
                 const channel = result.rss?.channel?.[0] || result.feed;
                 const items = channel?.item || channel?.entry || [];
                 
@@ -107,6 +104,26 @@ async function runScraper() {
                             content: content,
                             fetched_at: new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })
                         });
+                        newArticlesCount++;
+                    }
+                }
+
+                console.log(`[${siteName}] - ${newArticlesCount}টি নতুন খবর সেভ করা হয়েছে!`);
+
+            } catch (siteError) {
+                console.error(`[${siteName}] স্ক্র্যাপ করতে সমস্যা হয়েছে: ${siteError.message}`);
+            }
+        }
+
+        process.exit(0);
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
+runScraper();                        });
                         newArticlesCount++;
                     }
                 }
