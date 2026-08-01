@@ -165,6 +165,36 @@ runScraper();                        console.log(`[${todayDate}][${siteName}] �
     }
 }
 
+runScraper();                        console.log(`[${todayDate}][${siteName}] নতুন খবর লোড হচ্ছে: ${title}`);
+                        
+                        const content = await fetchFullArticle(link, siteName);
+
+                        await articleRef.set({
+                            title: title,
+                            link: link,
+                            published_at: published_at,
+                            content: content,
+                            fetched_at: new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })
+                        });
+                        newArticlesCount++;
+                    }
+                }
+
+                console.log(`[${todayDate}][${siteName}] - ${newArticlesCount}টি নতুন খবর সেভ করা হয়েছে!`);
+
+            } catch (siteError) {
+                console.error(`[${siteName}] স্ক্র্যাপ করতে সমস্যা হয়েছে: ${siteError.message}`);
+            }
+        }
+
+        process.exit(0);
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
 runScraper();                    }
                 }
 
