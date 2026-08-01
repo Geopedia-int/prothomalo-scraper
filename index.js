@@ -40,7 +40,6 @@ const AXIOS_CONFIG = {
     timeout: 15000
 };
 
-// বর্তমান তারিখ (YYYY-MM-DD) বের করার ফাংশন (বাংলাদেশ সময় অনুযায়ী)
 function getTodayDate() {
     const now = new Date();
     const options = { timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -73,7 +72,7 @@ function generateHash(text) {
 
 async function runScraper() {
     try {
-        const todayDate = getTodayDate(); // যেমন: 2026-08-01
+        const todayDate = getTodayDate();
 
         for (const [siteName, url] of Object.entries(RSS_FEEDS)) {
             try {
@@ -99,13 +98,41 @@ async function runScraper() {
                     if (!link || !title) continue;
 
                     const articleId = generateHash(link);
-                    
-                    // 📌 ডাটাবেজের পাথ: news -> তারিখ (YYYY-MM-DD) -> সাইটের নাম -> আর্টিকেল আইডি
                     const articleRef = db.ref(`news/${todayDate}/${siteName}/${articleId}`);
 
                     const snapshot = await articleRef.once('value');
                     if (!snapshot.exists()) {
                         console.log(`[${todayDate}][${siteName}] নতুন খবর লোড হচ্ছে: ${title}`);
+                        
+                        const content = await fetchFullArticle(link, siteName);
+
+                        await articleRef.set({
+                            title: title,
+                            link: link,
+                            published_at: published_at,
+                            content: content,
+                            fetched_at: new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })
+                        });
+                        newArticlesCount++;
+                    }
+                }
+
+                console.log(`[${todayDate}][${siteName}] - ${newArticlesCount}টি নতুন খবর সেভ করা হয়েছে!`);
+
+            } catch (siteError) {
+                console.error(`[${siteName}] স্ক্র্যাপ করতে সমস্যা হয়েছে: ${siteError.message}`);
+            }
+        }
+
+        process.exit(0);
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        process.exit(1);
+    }
+}
+
+runScraper();                        console.log(`[${todayDate}][${siteName}] নতুন খবর লোড হচ্ছে: ${title}`);
                         
                         const content = await fetchFullArticle(link, siteName);
 
