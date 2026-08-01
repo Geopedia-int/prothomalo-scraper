@@ -1,0 +1,28 @@
+name: Prothom Alo Cloud Scraper
+
+on:
+  schedule:
+    # প্রতি ১৫ মিনিট পর পর ক্লাউডে অটোমেটিক রান হবে (৫ মিনিট/১০ মিনিটও করা যায়)
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # চাইলে ম্যানুয়ালি রান করার বাটন
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Scraper
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+        run: node index.js
