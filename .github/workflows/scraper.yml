@@ -1,22 +1,22 @@
-name: Prothom Alo Cloud Scraper
+name: News Scraper
 
 on:
   schedule:
-    # প্রতি ১৫ মিনিট পর পর ক্লাউডে অটোমেটিক রান হবে (৫ মিনিট/১০ মিনিটও করা যায়)
-    - cron: '*/15 * * * *'
-  workflow_dispatch: # চাইলে ম্যানুয়ালি রান করার বাটন
+    # প্রতি ৫ মিনিট পর পর রান করার জন্য
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # ম্যানুয়ালি রান করার জন্য অপশন
 
 jobs:
-  scrape-and-update:
+  scrape:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-node-version: '18'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
